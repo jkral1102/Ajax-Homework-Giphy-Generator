@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Animals Giphy Generator</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+    <style>
+        button {
+            color: white;
+            background-color: teal;
+            border-radius: 3px;
+            padding-left: 20px;
+            padding-right: 20px;
+            margin: 5px;
+            border: solid 2px black;
+            text-align: center;
+        }
+
+        body {
+            background-color: purple;
+        }
+
+        .gif_container {
+            display: inline-block;
+            position: relative;
+            background-color: blue;
+            padding: 5px;
+            float: left;
+            max-width: 50vw;
+        }
+
+        #animal-form {
+            background-color: green;
+            padding: 10px;
+          
+        }
+        .container {
+            position: relative;
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row ">
+            <div id="animalButtons"></div>
+        </div>
+
+        <div class="row">
+                <div class="col-lg-4">
+                        <!-- <div class="col-lg-4 col-lg-offset-8"></div> -->
+                        <form id="animal-form">
+                            <label for="animal-input">Add an animal</label>
+                            <input type="text" id="animal-input">
+                            <br>
+                            <input id="addAnimal" type="submit" value="Submit">
+                        </form>
+                    </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-lg-12 d-inline-block">
+                <div id="animals"></div>
+            </div>
+
+           
+
+        </div>
+    </div>
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var animalsArray = ["dog", "cat", "rabbit", "hamster", "skunk", "goldfish", "bird", "ferret", "turtle", "sugar glider", "chinchilla", "hedgehog", "hermit crab", "gerbil", "pygmy goat", "chicken", "crapybara", "teacup pig", "serval", "salamander", "frog"];
+
+        function renderButtons() {
+
+            $("#animalButtons").empty();
+
+            for (var i = 0; i < animalsArray.length; i++) {
+                // console.log(animalsArray[i]);
+                var a = $("<button>");
+                a.addClass("animal");
+                a.attr("data-name", animalsArray[i]);
+                a.text(animalsArray[i]);
+                a.on("click", function (event) {
+                    var newInput = $(this).attr("data-name");
+                    query(newInput);
+                })
+                //a.attr("type", "newBtn");
+                $("#animalButtons").append(a);
+            }
+        }
+
+        renderButtons();
+
+
+        $("#addAnimal").on("click", function (event) {
+            event.preventDefault();
+            // grab input from textbox
+            var newInput = $("#animal-input").val().trim().toLowerCase();
+            // push to the array 
+            animalsArray.push(newInput);
+            //create a new button with input
+            renderButtons();
+            query(newInput);
+        })
+        // search giphy for api + "animal name"
+        function query(newInput) {
+
+            var publicKey = "dc6zaTOxFJmzC";
+            var limit = "10";
+            var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + newInput + "&limit=" + limit + "&api_key=" + publicKey;
+
+            $.ajax({ url: queryURL, method: 'GET' })
+                .done(function (response) {
+                    $('#animals').empty();
+                    for (i = 0; i < response.data.length; i++) {
+                        var currentStillURL = response.data[i].images.fixed_height_still.url;
+                        var currentMovingURL = response.data[i].images.fixed_height.url; 
+                        // Create a div for each gif returned
+                        var currentGifDiv = $('<div>');
+                        currentGifDiv.addClass('gif_container');
+                         // Added a class
+                        // Create an img tag for each gif returned
+                        var currentGif = $('<img>');
+                        currentGif.attr("data-still", currentStillURL);
+                        currentGif.attr("data-state", "moving");
+                        currentGif.attr("src", currentMovingURL);
+                        currentGif.attr("data-moving", currentMovingURL);
+                        currentGif.addClass("gif");
+                        currentGifDiv.append(currentGif);
+                        $('#animals').append(currentGifDiv);
+                    }
+
+                    $('.gif').on("click", function (event) {
+                        var state = $(this).attr("data-state");
+                        if (state === "moving") {
+                            // change src to the still URL
+                            $(this).attr("src", $(this).attr("data-still"));
+                            // change state to still
+                            $(this).attr("data-state", "still");
+                        }
+                        else {
+                            $(this).attr("src", $(this).attr("data-moving"));
+                            $(this).attr("data-state", "moving");
+                        }
+
+
+                    })
+
+                })
+        }
+
+
+
+        // on gif click, pause 
+
+
+
+
+    </script>
+
+</body>
+
+</html>
